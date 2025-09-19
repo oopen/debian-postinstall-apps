@@ -26,6 +26,6 @@ GNOME and XFCE desktop-specific extensions are always installed to ensure deskto
 
 To invoke the latest master version of this script directly from GitHub and execute it without saving locally, you can run:
 
-    ```
-	bash <(curl -fsSL https://raw.githubusercontent.com/oOpen/debian-postinstall-apps/master/debian-postinstall-apps.sh)
-    ```
+```sh
+bash <(curl -fsSL https://raw.githubusercontent.com/oOpen/debian-postinstall-apps/master/debian-postinstall-apps.sh)
+ ```
