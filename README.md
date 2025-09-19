@@ -29,3 +29,67 @@ To invoke the latest master version of this script directly from GitHub and exec
 ```sh
 bash <(curl -fsSL https://raw.githubusercontent.com/oOpen/debian-postinstall-apps/master/debian-postinstall-apps.sh)
  ```
+
+ ## Installed Applications
+
+### Essential packages (apt)
+- Apostrophe text editor
+- aria2 (Download utility)
+- bat (Cat clone with syntax highlighting)
+- btop (Resource monitor)
+- Cheese (Webcam application)
+- CUPS printing system and filters
+- curl (Data transfer tool)
+- Evolution (Email and calendar)
+- Flatpak package manager
+- foomatic-db (Printer driver database)
+- GIMP (Image editor)
+- git (Version control system)
+- micro (Terminal-based text editor)
+- nomacs (Image viewer)
+- papers (Reference manager)
+- pdfarranger (PDF tool)
+- Printer-driver-all (Generic printer drivers)
+- pixz (Parallel lossless compression)
+- simple-scan (Document scanner app)
+- snap package manager
+- system-config-printer (Printer configuration tool)
+- uget (Download manager)
+- unrar-free (RAR archive extractor)
+- VLC (Media player)
+- wget (Command line downloader)
+- xclip (Clipboard manager via CLI)
+- yt-dlp (Youtube downloader)
+- zsh (Shell alternative to bash)
+
+### Flatpak applications
+- Curtail (Video trimming tool)
+- Riot (Decentralized chat client)
+- Yoga Image Optimizer (Image optimizer)
+- Brave Browser
+- Zapzap (WhatsApp client)
+- RustDesk (Remote desktop)
+- FreeTube (Youtube client)
+- qTox (Secure instant messaging)
+- Librewolf (Privacy focused Firefox fork)
+- LocalSend (Local file sharing)
+- Junction (Custom web browser)
+
+If running on x86_64 architecture, also:
+- OnlyOffice Desktop Editors
+- Signal messenger
+
+### Installed GNOME Shell Extensions
+- **AppIndicator Support**: Enables legacy system tray icons for applications that use AppIndicators.
+- **Arc Menu**: Classic-style application menu similar to traditional desktop environments.
+- **Dash to Dock**: Configurable dock for app launching and window management.
+- **Easy Screencast**: Desktop screen recording tool.
+- **Freon**: Hardware sensor readouts like temperatures and fan speeds in system tray.
+- **GPaste**: Clipboard manager with history access.
+- **GSConnect**: Integrates phone with desktop for notifications and file sharing.
+- **GSConnect Browsers**: Browser integration for GSConnect.
+- **System Monitor**: Displays real-time CPU, memory, disk, and network usage.
+
+### Software Center Plugins for GNOME and XFCE
+- `gnome-software-plugin-flatpak` (Flatpak integration)
+- `gnome-software-plugin-snap` (Snap integration)
