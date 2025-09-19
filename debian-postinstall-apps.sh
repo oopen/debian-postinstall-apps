@@ -37,6 +37,11 @@ ESSENTIAL_PACKAGES=(
     foomatic-db "Printer driver database" on
     gimp "Image editor" on
     git "Version control system" on
+    gnome-authenticator "OTP Authenticator" on
+    gnome-decoder "QRCode generator/decoder" on
+	gnome-video-effects-frei0r "Video effects, used by Cheese" on
+	grsync "Files r-sync GUI" on
+	htop "Terminal-based system monitor" on
     micro "Terminal-based text editor" on
     nomacs "Image viewer" on
     papers "Reference manager" on
@@ -108,24 +113,27 @@ else
 fi
 echo
 
-# Always install GNOME desktop extensions
-echo -e "${MAGENTA}${BOLD}Installing GNOME desktop extensions...${RESET}"
-sudo apt install -y \
-    gnome-shell-extension-appindicator \
-    gnome-shell-extension-arc-menu \
-    gnome-shell-extension-dashtodock \
-    gnome-shell-extension-easyscreencast \
-    gnome-shell-extension-freon \
-    gnome-shell-extension-gpaste \
-    gnome-shell-extension-gsconnect \
-    gnome-shell-extension-gsconnect-browsers \
-    gnome-shell-extension-system-monitor || echo -e "${RED}Failed to install some GNOME extensions.${RESET}"
-echo
-
-# Always install XFCE and GNOME Flatpak plugins if desktop environment matches
-if [ "$XDG_CURRENT_DESKTOP" = "XFCE" ] || [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
-    echo -e "${MAGENTA}Installing Flatpak and Snap plugins for app stores...${RESET}"
+if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
+    echo -e "${MAGENTA}${BOLD}Installing GNOME desktop extensions...${RESET}"
     sudo apt install -y \
+        gnome-shell-extension-appindicator \
+        gnome-shell-extension-arc-menu \
+        gnome-shell-extension-dashtodock \
+        gnome-shell-extension-easyscreencast \
+        gnome-shell-extension-freon \
+        gnome-shell-extension-gpaste \
+        gnome-shell-extension-gsconnect \
+        gnome-shell-extension-gsconnect-browsers \
+        gnome-shell-extension-system-monitor || echo -e "${RED}Failed to install some GNOME extensions.${RESET}"
+    echo
+fi
+
+if [ "$XDG_CURRENT_DESKTOP" = "XFCE" ] || [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
+    echo -e "${MAGENTA}Installing some Gnome apps and Flatpak + Snap plugins for app stores...${RESET}"
+    sudo apt install -y \
+        gnome-calculator \
+	    gnome-calendar \
+	    gnome-contacts \
         gnome-software-plugin-flatpak \
         gnome-software-plugin-snap || echo -e "${RED}Failed to install software plugins.${RESET}"
     echo
