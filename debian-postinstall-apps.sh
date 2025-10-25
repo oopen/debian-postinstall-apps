@@ -33,7 +33,6 @@ ESSENTIAL_PACKAGES=(
     cups-filters "CUPS filters" on
     curl "Data transfer tool" on
     evolution "Email and calendar" on
-    flatpak "Flatpak package manager" on
     foomatic-db "Printer driver database" on
     gimp "Image editor" on
     git "Version control system" on
@@ -49,7 +48,6 @@ ESSENTIAL_PACKAGES=(
     printer-driver-all "Generic printer drivers" on
     pixz "Parallel lossless compression" on
     simple-scan "Document scanner app" on
-    snap "Snap package manager" on
     system-config-printer "Printer config tool" on
     uget "Download manager" on
     unrar-free "RAR archive extractor" on
@@ -102,6 +100,14 @@ echo
 
 echo -e "${CYAN}${BOLD}Upgrading system...${RESET}"
 sudo apt full-upgrade -y || { echo -e "${RED}System upgrade failed! Aborting.${RESET}"; exit 1; }
+echo
+
+echo -e "${CYAN}${BOLD}Install flatpak & snap${RESET}"
+sudo apt install -y flatpak snap || { echo -e "${RED}Install failed! Aborting.${RESET}"; exit 1; }
+echo
+
+echo -e "${CYAN}${BOLD}Configure flathub.org${RESET}"
+sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || { echo -e "${RED}Fail to configure flathub.org! Aborting.${RESET}"; exit 1; }
 echo
 
 # Install selected essential packages
