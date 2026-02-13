@@ -1,105 +1,124 @@
 # Debian Post-Install Setup Script
 
 ## Overview
-This Bash script automates the installation of an opinionated / recrurent / essential software set on a Debian-based system.
-It provides an interactive, user-friendly terminal interface for selecting packages to install, including support for Flatpak applications. 
-The script installs system updates, desktop environment extensions, and configures the default web browser with Junction.
-
-It adapts dynamically to your CPU architecture by only showing certain Flatpak apps on supported architectures (x86_64).
-GNOME and XFCE desktop-specific extensions are always installed to ensure desktop functionality.
+This Bash script automates the installation of essential software on a Debian-based system.
+It provides an interactive, user-friendly terminal interface for selecting packages to install, with support for APT, Flatpak, and Snap packages.
 
 ## Features
-- Interactive APT and Flatpak app selection.
-- Full system update and upgrade.
-- Architecture-aware Flatpak app selection.
-- Automatic installation of GNOME desktop extensions and plugins for GNOME and XFCE.
-- Clear and structured terminal output with color for usability.
-- Sets the default web browser upon completion.
+- Interactive APT, Flatpak, and Snap package selection
+- Dynamic package descriptions retrieved from package managers
+- Architecture compatibility checking
+- Automatic installation of GNOME desktop extensions and plugins
+- Color-coded terminal output for better readability
 
 ## Requirements
-- Debian or Debian-based Linux distribution.
-- `sudo` privileges.
-- Internet connection.
-- Terminal supporting ANSI colors.
-- Desktop environment environment variables set (e.g. `XDG_CURRENT_DESKTOP`).
+- Debian or Debian-based Linux distribution
+- `sudo` privileges (or run as root)
+- `wget` and `sudo` must be installed beforehand
+- Internet connection
+- Terminal supporting ANSI colors
+- Desktop environment variables set (e.g. `XDG_CURRENT_DESKTOP`)
 
-## Invocation via curl from GitHub
+### Prerequisites Installation
+If not already installed:
+```bash
+sudo apt update
+sudo apt install -y wget sudo
+```
 
-To invoke the latest master version of this script directly from GitHub and execute it without saving locally, you can run:
+## Installation
 
-```sh
+### Method 1: Direct Execution from GitHub
+```bash
+bash <(wget -O- https://raw.githubusercontent.com/oOpen/debian-postinstall-apps/master/debian-postinstall-apps.sh)
+```
+
+Or with curl:
+```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/oOpen/debian-postinstall-apps/master/debian-postinstall-apps.sh)
- ```
+```
 
- ## Installed Applications
+### Method 2: Download and Execute Locally
+```bash
+wget https://raw.githubusercontent.com/oOpen/debian-postinstall-apps/master/debian-postinstall-apps.sh
+chmod +x debian-postinstall-apps.sh
+./debian-postinstall-apps.sh
+```
 
-### Essential packages (apt)
-- Apostrophe text editor
-- aria2 (Download utility)
-- bat (Cat clone with syntax highlighting)
-- btop (Resource monitor)
-- Cheese (Webcam application)
-- CUPS printing system and filters
-- curl (Data transfer tool)
-- Evolution (Email and calendar)
-- Flatpak package manager
-- foomatic-db (Printer driver database)
-- GIMP (Image editor)
-- git (Version control system)
-- gnome-authenticator (OTP Authenticator)
-- gnome-decoder (QRCode generator/decoder)
--	gnome-video-effects-frei0r (Video effects, used by Cheese)
--	grsync (Files rsync GUI)
--	htop (Terminal-based system monitor)
-- micro (Terminal-based text editor)
-- nomacs (Image viewer)
-- papers (Reference manager)
-- pdfarranger (PDF tool)
-- Printer-driver-all (Generic printer drivers)
-- pixz (Parallel lossless compression)
-- simple-scan (Document scanner app)
-- snap package manager
-- system-config-printer (Printer configuration tool)
-- uget (Download manager)
-- unrar-free (RAR archive extractor)
-- VLC (Media player)
-- wget (Command line downloader)
-- xclip (Clipboard manager via CLI)
-- yt-dlp (Youtube downloader)
-- zsh (Shell alternative to bash)
+## Installed Applications
 
-### Flatpak applications
-- Curtail (Video trimming tool)
-- Riot (Decentralized chat client)
-- Yoga Image Optimizer (Image optimizer)
-- Brave Browser
-- Zapzap (WhatsApp client)
-- RustDesk (Remote desktop)
-- FreeTube (Youtube client)
-- qTox (Secure instant messaging)
-- Librewolf (Privacy focused Firefox fork)
-- LocalSend (Local file sharing)
-- Junction (Web browser selector)
+### APT Packages
+- **Text editors**: apostrophe, micro
+- **Development**: git
+- **System utilities**: bat, btop, htop, curl, wget, zsh
+- **VPN tools**: network-manager-openvpn, network-manager-openvpn-gnome, wireguard, wireguard-tools
+- **Multimedia**: cheese, gimp, vlc
+- **Office**: evolution, nomacs, papers, pdfarranger
+- **Printing**: cups, cups-filters, foomatic-db, printer-driver-all, simple-scan, system-config-printer
+- **Download tools**: aria2, uget, yt-dlp
+- **Security**: gnome-authenticator, gnome-decoder
+- **Utilities**: grsync, pixz, unrar-free, xclip
 
-If running on `x86_64` architecture, also:
-- OnlyOffice Desktop Editors
-- Signal messenger
+### Flatpak Applications (Default)
+- **Browsers**: com.brave.Browser, io.github.ungoogled_software.ungoogled_chromium, io.gitlab.librewolf-community
+- **Communication**: com.rustdesk.RustDesk, im.riot.Riot, io.github.qtox.qTox
+- **Productivity**: net.cozic.joplin_desktop, org.pvermeer.WebAppHub
+- **Media**: io.freetubeapp.FreeTube
+- **Utilities**: com.github.huluti.Curtail, org.flozz.yoga-image-optimizer, org.localsend.localsend_app, re.sonny.Junction
 
-### If GNOME :
-#### Shell Extensions
-- **AppIndicator Support**: Enables legacy system tray icons for applications that use AppIndicators.
-- **Arc Menu**: Classic-style application menu similar to traditional desktop environments.
-- **Dash to Dock**: Configurable dock for app launching and window management.
-- **Easy Screencast**: Desktop screen recording tool.
-- **Freon**: Hardware sensor readouts like temperatures and fan speeds in system tray.
-- **GPaste**: Clipboard manager with history access.
-- **GSConnect**: Integrates phone with desktop for notifications and file sharing.
-- **GSConnect Browsers**: Browser integration for GSConnect.
-- **System Monitor**: Displays real-time CPU, memory, disk, and network usage.
+### Snap Applications (Default)
+No default Snap packages are configured.
 
-### For GNOME and XFCE
-- `gnome-calculator` (Calculator)
-- `gnome-calendar` (Calendar)
-- `gnome-contacts` (Contacts)
-- `gnome-software-plugin-flatpak` (Flatpak integration)
-- `gnome-software-plugin-snap` (Snap integration)
+### Optional Applications (Not Selected by Default)
+The following applications are available but **not selected by default**:
+
+**Flatpak Optional:**
+- `com.rtosta.zapzap` - WhatsApp client
+
+**Snap Optional:**
+- `signal-desktop` - Signal messenger
+
+## Desktop-Specific Packages
+
+The script automatically detects your desktop environment and installs specific packages:
+
+### GNOME-Specific Packages (`PKG_GNOME`)
+Installed automatically if GNOME desktop is detected:
+- gnome-shell-extension-appindicator
+- gnome-shell-extension-dashtodock
+- gnome-shell-extension-easyscreencast
+- gnome-shell-extension-freon
+- gnome-shell-extension-gpaste
+- gnome-shell-extension-gsconnect
+- gnome-shell-extension-gsconnect-browsers
+- gnome-shell-extension-system-monitor
+
+### GNOME & XFCE Shared Packages (`PKG_GNOME_XFCE`)
+Installed for both GNOME and XFCE desktops:
+- gnome-calculator
+- gnome-calendar
+- gnome-contacts
+- gnome-software-plugin-flatpak
+- gnome-software-plugin-snap
+
+## Customization
+
+To customize which applications are installed, edit the arrays at the top of the script:
+
+**Main packages (selected by default in interactive mode):**
+- `PKG_APT` - APT packages
+- `PKG_FLATPAK` - Flatpak applications  
+- `PKG_SNAP` - Snap packages
+
+**Optional packages (not selected by default):**
+- `PKG_APT_OPTIONAL` - Optional APT packages
+- `PKG_FLATPAK_OPTIONAL` - Optional Flatpak apps
+- `PKG_SNAP_OPTIONAL` - Optional Snap packages
+
+**Desktop-specific packages (auto-installed based on desktop environment):**
+- `PKG_GNOME` - GNOME-specific packages
+- `PKG_GNOME_XFCE` - Packages for both GNOME and XFCE
+
+## License
+
+This project is licensed under the GNU GPL v3.0 - see the LICENSE file for details.

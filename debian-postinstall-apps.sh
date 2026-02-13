@@ -1,5 +1,110 @@
 #!/bin/bash
 
+# =============================================================================
+# APPLICATION LISTS - CUSTOMIZE HERE
+# =============================================================================
+
+# APT packages to install (selected by default)
+PKG_APT=(
+    apostrophe
+    aria2
+    bat
+    btop
+    cheese
+    cups
+    cups-filters
+    curl
+    evolution
+    foomatic-db
+    gimp
+    git
+    gnome-authenticator
+    gnome-decoder
+    gnome-video-effects-frei0r
+    grsync
+    htop
+    micro
+    network-manager-openvpn
+    network-manager-openvpn-gnome
+    nomacs
+    papers
+    pdfarranger
+    printer-driver-all
+    pixz
+    simple-scan
+    system-config-printer
+    uget
+    unrar-free
+    vlc
+    wget
+    wireguard-tools
+    xclip
+    yt-dlp
+    zsh
+)
+
+# APT optional packages (not selected by default)
+PKG_APT_OPTIONAL=()
+
+# Flatpak applications to install (selected by default)
+PKG_FLATPAK=(
+    com.brave.Browser
+    com.github.huluti.Curtail
+    com.rustdesk.RustDesk
+    im.riot.Riot
+    io.freetubeapp.FreeTube
+    io.github.qtox.qTox
+    io.github.ungoogled_software.ungoogled_chromium
+    io.gitlab.librewolf-community
+    net.cozic.joplin_desktop
+    org.flozz.yoga-image-optimizer
+    org.localsend.localsend_app
+    org.pvermeer.WebAppHub
+    re.sonny.Junction
+)
+
+# Flatpak optional applications (not selected by default)
+PKG_FLATPAK_OPTIONAL=(
+    com.rtosta.zapzap
+)
+
+# Snap applications to install (selected by default)
+PKG_SNAP=()
+
+# Snap optional applications (not selected by default)
+PKG_SNAP_OPTIONAL=(
+    signal-desktop
+)
+
+# =============================================================================
+# DESKTOP-SPECIFIC PACKAGES
+# =============================================================================
+
+# GNOME-specific packages (installed automatically if GNOME detected)
+PKG_GNOME=(
+    gnome-shell-extension-appindicator
+    gnome-shell-extension-dashtodock
+    gnome-shell-extension-easyscreencast
+    gnome-shell-extension-freon
+    gnome-shell-extension-gpaste
+    gnome-shell-extension-gsconnect
+    gnome-shell-extension-gsconnect-browsers
+    gnome-shell-extension-system-monitor
+)
+
+# Packages for both GNOME and XFCE
+PKG_GNOME_XFCE=(
+    gnome-calculator
+    gnome-calendar
+    gnome-contacts
+    gnome-software-plugin-flatpak
+    gnome-software-plugin-snap
+)
+
+# =============================================================================
+# SCRIPT START
+# =============================================================================
+
 # Color variables for output
 RED="\033[31m"
 GREEN="\033[32m"
@@ -10,158 +115,265 @@ CYAN="\033[36m"
 BOLD="\033[1m"
 RESET="\033[0m"
 
+# Detect system architecture
+SYS_ARCH=$(uname -m)
+
+# Check if running as root or with sudo
+check_privileges() {
+    if [ "$(id -u)" -eq 0 ]; then
+        SUDO_CMD=""
+        echo -e "${YELLOW}Running as root${RESET}"
+    elif sudo -n true 2>/dev/null; then
+        SUDO_CMD="sudo"
+        echo -e "${GREEN}Sudo available${RESET}"
+    else
+        echo -e "${RED}Error: This script requires root privileges or sudo access${RESET}"
+        echo -e "${YELLOW}Please ensure sudo is installed and configured${RESET}"
+        exit 1
+    fi
+}
+
+# Get description for APT package
+get_apt_description() {
+    local pkg="$1"
+    apt show "$pkg" 2>/dev/null | grep "^Description:" | cut -d':' -f2 | cut -d'(' -f1 | sed 's/^ *//' | head -c 50
+}
+
+# Get description for Flatpak app
+get_flatpak_description() {
+    local app="$1"
+    flatpak info "$app" 2>/dev/null | head -n 2 | tail -n 1 | head -c 50
+}
+
+# Get description for Snap app
+get_snap_description() {
+    local snap="$1"
+    snap info "$snap" 2>/dev/null | grep "summary:" | cut -d':' -f2 | sed 's/^ *//' | head -c 50
+}
+
+# Check if APT package is compatible with architecture
+is_apt_compatible() {
+    local pkg="$1"
+    local pkg_arch
+    pkg_arch=$(apt show "$pkg" 2>/dev/null | grep "^Architecture:" | awk '{print $2}')
+    [ "$pkg_arch" = "all" ] || [ "$pkg_arch" = "$SYS_ARCH" ] || [ -z "$pkg_arch" ]
+}
+
+# Check if Flatpak app is compatible
+is_flatpak_compatible() {
+    return 0
+}
+
+# Check if Snap is compatible
+is_snap_compatible() {
+    return 0
+}
+
 echo -e "${CYAN}${BOLD}Starting system update...${RESET}"
-sudo apt update || { echo -e "${RED}Failed to update package list! Aborting.${RESET}"; exit 1; }
+
+# Check privileges first
+check_privileges
+
+# Update system
+$SUDO_CMD apt update || { echo -e "${RED}Failed to update package list! Aborting.${RESET}"; exit 1; }
 echo
 
 # Preinstall dialog if needed
 if ! command -v dialog &> /dev/null; then
     echo -e "${YELLOW}Dialog not found. Installing dialog package for interactive menus...${RESET}"
-    sudo apt install -y dialog || { echo -e "${RED}Failed to install dialog. Aborting.${RESET}"; exit 1; }
+    $SUDO_CMD apt install -y dialog || { echo -e "${RED}Failed to install dialog. Aborting.${RESET}"; exit 1; }
 fi
 echo -e "${GREEN}Dialog is installed, proceeding...${RESET}"
 echo
 
-# Essential packages with short descriptions (excluding GNOME & XFCE-specific)
-ESSENTIAL_PACKAGES=(
-    apostrophe "Apostrophe text editor" on
-    aria2 "Download utility" on
-    bat "Cat clone with syntax highlighting" on
-    btop "Resource monitor" on
-    cheese "Webcam application" on
-    cups "Printing system" on
-    cups-filters "CUPS filters" on
-    curl "Data transfer tool" on
-    evolution "Email and calendar" on
-    foomatic-db "Printer driver database" on
-    gimp "Image editor" on
-    git "Version control system" on
-    gnome-authenticator "OTP Authenticator" on
-    gnome-decoder "QRCode generator/decoder" on
-	gnome-video-effects-frei0r "Video effects, used by Cheese" on
-	grsync "Files r-sync GUI" on
-	htop "Terminal-based system monitor" on
-    micro "Terminal-based text editor" on
-    nomacs "Image viewer" on
-    papers "Reference manager" on
-    pdfarranger "PDF manipulation tool" on
-    printer-driver-all "Generic printer drivers" on
-    pixz "Parallel lossless compression" on
-    simple-scan "Document scanner app" on
-    system-config-printer "Printer config tool" on
-    uget "Download manager" on
-    unrar-free "RAR archive extractor" on
-    vlc "Media player" on
-    wget "Command line downloader" on
-    xclip "Clipboard manager via CLI" on
-    yt-dlp "Youtube downloader" on
-    zsh "Shell alternative to bash" on
-)
+# =============================================================================
+# BUILD MENU OPTIONS WITH DESCRIPTIONS
+# =============================================================================
 
-echo -e "${BLUE}${BOLD}Please select the essential packages to install:${RESET}"
-ESSENTIAL_SELECTED=$(dialog --stdout --separate-output \
-    --checklist "Select essential packages (GNOME/XFCE packages installed by default):" 20 80 15 \
-    "${ESSENTIAL_PACKAGES[@]}")
-clear
-echo
+# Build APT options array (default + optional)
+APT_OPTIONS=()
+SKIPPED_APT=()
 
-arch=$(uname -m)
+# Add default packages (selected by default - "on")
+for pkg in "${PKG_APT[@]}"; do
+    if is_apt_compatible "$pkg"; then
+        desc=$(get_apt_description "$pkg")
+        [ -z "$desc" ] && desc="$pkg"
+        APT_OPTIONS+=("$pkg" "$desc" "on")
+    else
+        SKIPPED_APT+=("$pkg")
+    fi
+done
 
-# Base Flatpak apps (arch independent)
-FLATPAK_APPS=(
-    com.github.huluti.Curtail "Video trimming tool" on
-    im.riot.Riot "Decentralized chat client" on
-    org.flozz.yoga-image-optimizer "Image optimizer" on
-    com.brave.Browser "Brave web browser" on
-    com.rtosta.zapzap "WhatsApp client" on
-    com.rustdesk.RustDesk "Remote desktop" on
-    io.freetubeapp.FreeTube "Youtube client" on
-    io.github.qtox.qTox "Secure instant messaging" on
-    io.gitlab.librewolf-community "Privacy focused Firefox fork" on
-    org.localsend.localsend_app "Local file sharing" on
-    re.sonny.Junction "Custom web browser" on
-)
+# Add optional packages (not selected by default - "off")
+for pkg in "${PKG_APT_OPTIONAL[@]}"; do
+    if is_apt_compatible "$pkg"; then
+        desc=$(get_apt_description "$pkg")
+        [ -z "$desc" ] && desc="$pkg"
+        APT_OPTIONS+=("$pkg" "$desc" "off")
+    else
+        SKIPPED_APT+=("$pkg")
+    fi
+done
 
-if [ "$arch" = "x86_64" ]; then
-    # Append x86_64-specific apps
-    FLATPAK_APPS+=(
-        app/org.onlyoffice.desktopeditors "OnlyOffice Desktop Editors" on
-        app/org.signal.Signal "Signal messenger" on
-    )
+# Show skipped APT packages
+if [ ${#SKIPPED_APT[@]} -gt 0 ]; then
+    echo -e "${YELLOW}Warning: The following APT packages are not available for $SYS_ARCH:${RESET}"
+    printf "  - %s\n" "${SKIPPED_APT[@]}"
+    echo
 fi
 
-# Show dialog checklist with filtered FLATPAK_APPS
-FLATPAK_SELECTED=$(dialog --stdout --separate-output \
-    --checklist "Select Flatpak apps to install:" 20 80 15 \
-    "${FLATPAK_APPS[@]}")
+# Build Flatpak options array (default + optional)
+FLATPAK_OPTIONS=()
+SKIPPED_FLATPAK=()
 
+# Add default applications (selected by default - "on")
+for app in "${PKG_FLATPAK[@]}"; do
+    if is_flatpak_compatible "$app"; then
+        desc=$(get_flatpak_description "$app")
+        [ -z "$desc" ] && desc="$app"
+        FLATPAK_OPTIONS+=("$app" "$desc" "on")
+    else
+        SKIPPED_FLATPAK+=("$app")
+    fi
+done
+
+# Add optional applications (not selected by default - "off")
+for app in "${PKG_FLATPAK_OPTIONAL[@]}"; do
+    if is_flatpak_compatible "$app"; then
+        desc=$(get_flatpak_description "$app")
+        [ -z "$desc" ] && desc="$app"
+        FLATPAK_OPTIONS+=("$app" "$desc" "off")
+    else
+        SKIPPED_FLATPAK+=("$app")
+    fi
+done
+
+# Show skipped Flatpak packages
+if [ ${#SKIPPED_FLATPAK[@]} -gt 0 ]; then
+    echo -e "${YELLOW}Warning: The following Flatpak apps are not available for $SYS_ARCH:${RESET}"
+    printf "  - %s\n" "${SKIPPED_FLATPAK[@]}"
+    echo
+fi
+
+# Build Snap options array (default + optional)
+SNAP_OPTIONS=()
+SKIPPED_SNAP=()
+
+# Add default snaps (selected by default - "on")
+for snap in "${PKG_SNAP[@]}"; do
+    if is_snap_compatible "$snap"; then
+        desc=$(get_snap_description "$snap")
+        [ -z "$desc" ] && desc="$snap"
+        SNAP_OPTIONS+=("$snap" "$desc" "on")
+    else
+        SKIPPED_SNAP+=("$snap")
+    fi
+done
+
+# Add optional snaps (not selected by default - "off")
+for snap in "${PKG_SNAP_OPTIONAL[@]}"; do
+    if is_snap_compatible "$snap"; then
+        desc=$(get_snap_description "$snap")
+        [ -z "$desc" ] && desc="$snap"
+        SNAP_OPTIONS+=("$snap" "$desc" "off")
+    else
+        SKIPPED_SNAP+=("$snap")
+    fi
+done
+
+# Show skipped Snap packages
+if [ ${#SKIPPED_SNAP[@]} -gt 0 ]; then
+    echo -e "${YELLOW}Warning: The following Snap apps are not available for $SYS_ARCH:${RESET}"
+    printf "  - %s\n" "${SKIPPED_SNAP[@]}"
+    echo
+fi
+
+# =============================================================================
+# SHOW INTERACTIVE MENUS
+# =============================================================================
+
+echo -e "${BLUE}${BOLD}Please select the APT packages to install:${RESET}"
+APT_SELECTED=$(dialog --stdout --separate-output \
+    --checklist "Select APT packages to install (GNOME/XFCE packages installed by default):" 25 80 20 \
+    "${APT_OPTIONS[@]}")
 clear
 echo
+
+echo -e "${BLUE}${BOLD}Please select the Flatpak applications to install:${RESET}"
+FLATPAK_SELECTED=$(dialog --stdout --separate-output \
+    --checklist "Select Flatpak applications to install:" 25 80 15 \
+    "${FLATPAK_OPTIONS[@]}")
+clear
+echo
+
+# Only show Snap menu if there are Snap packages configured
+if [ ${#SNAP_OPTIONS[@]} -gt 0 ]; then
+    echo -e "${BLUE}${BOLD}Please select the Snap applications to install:${RESET}"
+    SNAP_SELECTED=$(dialog --stdout --separate-output \
+        --checklist "Select Snap applications to install:" 20 80 10 \
+        "${SNAP_OPTIONS[@]}")
+    clear
+    echo
+fi
+
+# =============================================================================
+# INSTALLATION
+# =============================================================================
 
 echo -e "${CYAN}${BOLD}Upgrading system...${RESET}"
-sudo apt full-upgrade -y || { echo -e "${RED}System upgrade failed! Aborting.${RESET}"; exit 1; }
+$SUDO_CMD apt full-upgrade -y || { echo -e "${RED}System upgrade failed! Aborting.${RESET}"; exit 1; }
 echo
 
-echo -e "${CYAN}${BOLD}Install flatpak & snap${RESET}"
-sudo apt install -y flatpak snap || { echo -e "${RED}Install failed! Aborting.${RESET}"; exit 1; }
+echo -e "${CYAN}${BOLD}Installing flatpak & snap...${RESET}"
+$SUDO_CMD apt install -y flatpak snap || { echo -e "${RED}Install failed! Aborting.${RESET}"; exit 1; }
 echo
 
-echo -e "${CYAN}${BOLD}Configure flathub.org${RESET}"
-sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || { echo -e "${RED}Fail to configure flathub.org! Aborting.${RESET}"; exit 1; }
+echo -e "${CYAN}${BOLD}Configuring flathub.org...${RESET}"
+$SUDO_CMD flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo || { echo -e "${RED}Failed to configure flathub.org! Aborting.${RESET}"; exit 1; }
 echo
 
-# Install selected essential packages
-if [ -n "$ESSENTIAL_SELECTED" ]; then
-    echo -e "${GREEN}${BOLD}Installing selected essential packages...${RESET}"
-    sudo apt install -y $ESSENTIAL_SELECTED || echo -e "${RED}One or more essential packages failed to install.${RESET}"
+# Install selected APT packages
+if [ -n "$APT_SELECTED" ]; then
+    echo -e "${GREEN}${BOLD}Installing selected APT packages...${RESET}"
+    $SUDO_CMD apt install -y $APT_SELECTED || echo -e "${RED}One or more APT packages failed to install.${RESET}"
 else
-    echo -e "${YELLOW}No essential packages selected for installation.${RESET}"
+    echo -e "${YELLOW}No APT packages selected for installation.${RESET}"
 fi
 echo
 
-if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
+# Install desktop-specific packages
+if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ] && [ ${#PKG_GNOME[@]} -gt 0 ]; then
     echo -e "${MAGENTA}${BOLD}Installing GNOME desktop extensions...${RESET}"
-    sudo apt install -y \
-        gnome-shell-extension-appindicator \
-        gnome-shell-extension-arc-menu \
-        gnome-shell-extension-dashtodock \
-        gnome-shell-extension-easyscreencast \
-        gnome-shell-extension-freon \
-        gnome-shell-extension-gpaste \
-        gnome-shell-extension-gsconnect \
-        gnome-shell-extension-gsconnect-browsers \
-        gnome-shell-extension-system-monitor || echo -e "${RED}Failed to install some GNOME extensions.${RESET}"
+    $SUDO_CMD apt install -y "${PKG_GNOME[@]}" || echo -e "${RED}Failed to install some GNOME extensions.${RESET}"
     echo
 fi
 
 if [ "$XDG_CURRENT_DESKTOP" = "XFCE" ] || [ "$XDG_CURRENT_DESKTOP" = "GNOME" ]; then
-    echo -e "${MAGENTA}Installing some Gnome apps and Flatpak + Snap plugins for app stores...${RESET}"
-    sudo apt install -y \
-        gnome-calculator \
-	    gnome-calendar \
-	    gnome-contacts \
-        gnome-software-plugin-flatpak \
-        gnome-software-plugin-snap || echo -e "${RED}Failed to install software plugins.${RESET}"
-    echo
+    if [ ${#PKG_GNOME_XFCE[@]} -gt 0 ]; then
+        echo -e "${MAGENTA}Installing GNOME apps and Flatpak + Snap plugins for app stores...${RESET}"
+        $SUDO_CMD apt install -y "${PKG_GNOME_XFCE[@]}" || echo -e "${RED}Failed to install software plugins.${RESET}"
+        echo
+    fi
 fi
 
 # Install selected Flatpak apps
 if [ -n "$FLATPAK_SELECTED" ]; then
     echo -e "${GREEN}${BOLD}Installing selected Flatpak apps...${RESET}"
-    flatpak install -y $FLATPAK_SELECTED || echo -e "${RED}One or more Flatpak apps failed to install.${RESET}"
+    flatpak install -y flathub $FLATPAK_SELECTED || echo -e "${RED}One or more Flatpak apps failed to install.${RESET}"
 else
     echo -e "${YELLOW}No Flatpak apps selected for installation.${RESET}"
 fi
 echo
 
-# Detect CPU architecture and install additional Flatpak apps if x86_64
-if [ "$arch" = "x86_64" ]; then
-    echo -e "${GREEN}64-bit architecture detected. Installing additional Flatpak apps...${RESET}"
-    flatpak install -y \
-        app/org.onlyoffice.desktopeditors \
-        app/org.signal.Signal || echo -e "${RED}Failed to install additional Flatpak apps.${RESET}"
+# Install selected Snap apps
+if [ -n "$SNAP_SELECTED" ]; then
+    echo -e "${GREEN}${BOLD}Installing selected Snap apps...${RESET}"
+    for snap in $SNAP_SELECTED; do
+        $SUDO_CMD snap install "$snap" || echo -e "${RED}Failed to install $snap.${RESET}"
+    done
 else
-    echo -e "${YELLOW}CPU is not x86_64, skipping some Flatpak installations.${RESET}"
+    echo -e "${YELLOW}No Snap apps selected for installation.${RESET}"
 fi
 echo
 
