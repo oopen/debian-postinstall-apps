@@ -350,6 +350,13 @@ echo
 if [ "$XDG_CURRENT_DESKTOP" = "GNOME" ] && [ ${#PKG_GNOME[@]} -gt 0 ]; then
     echo -e "${MAGENTA}${BOLD}Installing GNOME desktop extensions...${RESET}"
     $SUDO_CMD apt install -y "${PKG_GNOME[@]}" || echo -e "${RED}Failed to install some GNOME extensions.${RESET}"
+    
+    # Enable installed extensions
+    echo -e "${MAGENTA}Enabling GNOME extensions...${RESET}"
+    if command -v gnome-extensions &>/dev/null; then
+        gnome-extensions list 2>/dev/null | xargs -r -I {} gnome-extensions enable {} 2>/dev/null || true
+        echo -e "${GREEN}Extensions enabled${RESET}"
+    fi
     echo
 fi
 
