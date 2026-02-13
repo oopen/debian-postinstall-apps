@@ -1,11 +1,11 @@
-# Debian Post-Install Script
+# Debian Missing Apps
 
-One script to install essential apps on Debian/Ubuntu with a single interactive menu.
+Install the apps Debian should have by default. One interactive menu for APT, Flatpak, and Snap packages.
 
 ## Quick Start
 
 ```bash
-bash <(wget -O- https://raw.githubusercontent.com/oOpen/debian-postinstall-apps/master/debian-postinstall-apps.sh)
+bash <(wget -O- https://raw.githubusercontent.com/oOpen/debian-missing-apps/master/installer.sh)
 ```
 
 ## What It Does
