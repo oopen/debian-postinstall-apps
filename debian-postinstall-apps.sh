@@ -66,6 +66,10 @@ PKG_FLATPAK=(
 # Flatpak optional applications (not selected by default)
 PKG_FLATPAK_OPTIONAL=(
     com.rtosta.zapzap
+    so.onekey.Wallet
+    io.trezor.suite
+    org.electrum.electrum
+    org.getmonero.Monero
 )
 
 # Snap applications to install (selected by default)

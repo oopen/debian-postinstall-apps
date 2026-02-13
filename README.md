@@ -74,6 +74,10 @@ The following applications are available but **not selected by default**:
 
 **Flatpak Optional:**
 - `com.rtosta.zapzap` - WhatsApp client
+- `so.onekey.Wallet` - OneKey crypto wallet
+- `io.trezor.suite` - Trezor hardware wallet software
+- `org.electrum.electrum` - Electrum Bitcoin wallet
+- `org.getmonero.Monero` - Monero GUI wallet
 
 **Snap Optional:**
 - `signal-desktop` - Signal messenger
