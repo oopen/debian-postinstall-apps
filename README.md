@@ -49,6 +49,7 @@ Want to add useful open-source apps? Contributions welcome!
 
 **Criteria:**
 - Must be open source
+- If the application is open source but its core/network component is proprietary, add as optional
 - Available on APT, Flatpak, or Snap
 - Useful for most Debian users
 
